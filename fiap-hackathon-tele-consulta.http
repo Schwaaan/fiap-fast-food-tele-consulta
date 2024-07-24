@@ -1,0 +1,6 @@
+@fiap_hackathon_tele_consulta_HostAddress = http://localhost:5011
+
+GET {{fiap_hackathon_tele_consulta_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
