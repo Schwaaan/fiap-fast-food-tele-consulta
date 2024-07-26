@@ -1,3 +1,6 @@
+using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Cryptography;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,29 +19,30 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapGet("/link/{idAgendamento}", ([SwaggerParameter] Guid idAgendamento) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    string url = "https://foursixhackathon.com.br?token=";
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    using (var sha256 = SHA256.Create())
+    {
+        byte[] hash = sha256.ComputeHash(idAgendamento.ToByteArray());
+        url += BitConverter.ToString(hash).Replace("-", "").ToLower();
+    }
+
+    return url;
+
+
+    //var forecast = Enumerable.Range(1, 5).Select(index =>
+    //    new WeatherForecast
+    //    (
+    //        DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+    //        Random.Shared.Next(-20, 55),
+    //        summaries[Random.Shared.Next(summaries.Length)]
+    //    ))
+    //    .ToArray();
+    //return forecast;
 })
-.WithName("GetWeatherForecast")
+.WithName("GetLinkTeleconsulta")
 .WithOpenApi();
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
